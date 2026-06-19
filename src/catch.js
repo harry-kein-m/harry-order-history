@@ -38,6 +38,6 @@ const main = async () => {
   };
 };
 
-const cronJob = cron.schedule("*/5 * * * * *", main);
+const cronJob = cron.schedule("*/5 * * * *", main);
 cronJob.start();
 console.log("Cron job started");
