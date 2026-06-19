@@ -1,0 +1,17 @@
+{
+  "name": "poly_orderBook_catch",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "harry <harry@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "node-cron": "^3.0.3",
+    "ws": "^8.18.0",
+    "axios": "^1.7.9",
+    "@polymarket/clob-client-v2": "^0.0.1"
+  },
+  "scripts": {
+    "catch": "node src/main.js",
+    "migrate": "node src/migrate.js"
+  }
+}
