@@ -1,4 +1,4 @@
-module.exports = (sequelize, DataTypes) => {
+export const OrderBookHistory = (sequelize, DataTypes) => {
   const OrderBookHistory = sequelize.define(
     'OrderBookHistory',
     {
@@ -26,8 +26,9 @@ module.exports = (sequelize, DataTypes) => {
     {
       tableName: 'order_book_history',
       underscored: true,
+      timestamps: false,
     },
   );
 
   return OrderBookHistory;
-};
+}

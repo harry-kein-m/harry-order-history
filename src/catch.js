@@ -28,12 +28,16 @@ const main = async () => {
     const data = JSON.parse(event.data);
     switch (data.event_type) {
       case "book": // full orderbook snapshot
-        saveResult(slug, data, clobTokenIds);
+        try {
+          await saveResult(slug, data, clobTokenIds);
+        } catch (error) {
+          console.error("Failed to save order book:", error.message);
+        }
         break;
     }
   };
 };
 
-const cronJob = cron.schedule("*/5 * * * *", main);
+const cronJob = cron.schedule("*/5 * * * * *", main);
 cronJob.start();
 console.log("Cron job started");
