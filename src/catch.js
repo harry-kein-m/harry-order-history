@@ -1,7 +1,7 @@
 import cron from "node-cron";
 import { makeCryptoUpDownSlug } from "./utils/index.js";
 import { getMarketBySlug } from "./poly-utils/gama-client.js";
-import { saveResult } from "../utils/saveResult.js";
+import { saveResult } from "./utils/saveResult.js";
 
 const main = async () => {
   const slug = makeCryptoUpDownSlug();
@@ -24,7 +24,7 @@ const main = async () => {
     );
   };
 
-  ws.onmessage = (event) => {
+  ws.onmessage = async (event) => {
     const data = JSON.parse(event.data);
     switch (data.event_type) {
       case "book": // full orderbook snapshot
