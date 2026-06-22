@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('order_book_history', {
+    await queryInterface.createTable('eth_history', {
       id: {
         type: Sequelize.BIGINT,
         primaryKey: true,
@@ -32,14 +32,14 @@ module.exports = {
       },
     });
 
-    await queryInterface.addIndex('order_book_history', ['slug']);
-    await queryInterface.addIndex('order_book_history', ['token_type']);
-    await queryInterface.addIndex('order_book_history', ['price']);
-    await queryInterface.addIndex('order_book_history', ['share_size']);
-    await queryInterface.addIndex('order_book_history', ['catch_time']);
+    await queryInterface.addIndex('eth_history', ['slug']);
+    await queryInterface.addIndex('eth_history', ['token_type']);
+    await queryInterface.addIndex('eth_history', ['price']);
+    await queryInterface.addIndex('eth_history', ['share_size']);
+    await queryInterface.addIndex('eth_history', ['catch_time']);
   },
 
   async down(queryInterface) {
-    await queryInterface.dropTable('order_book_history');
+    await queryInterface.dropTable('eth_history');
   },
 };
