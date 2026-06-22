@@ -1,4 +1,6 @@
-import { OrderBookHistory as defineOrderBookHistory } from "../../database/models/order-book-history.js";
+import { BtcHistory as defineBtcHistory } from "../../database/models/btc-history.js";
+import { EthHistory as defineEthHistory } from "../../database/models/eth-history.js";
+import { SolHistory as defineSolHistory } from "../../database/models/sol-history.js";
 import { Sequelize, DataTypes } from "sequelize";
 import config from "../../database/config/config.cjs";
 const { development: dbConfig } = config;
@@ -8,9 +10,23 @@ const sequelize = new Sequelize(
   dbConfig.password,
   dbConfig,
 );
-const OrderBookHistory = defineOrderBookHistory(sequelize, DataTypes);
 
 export async function saveResult(slug, data, clobTokenIds) {
+  let History;
+  switch (slug.split("-")[0]) {
+    case "btc":
+      History = defineBtcHistory(sequelize, DataTypes);
+      break;
+    case "eth":
+      History = defineEthHistory(sequelize, DataTypes);
+      break;
+    case "sol":
+      History = defineSolHistory(sequelize, DataTypes);
+      break;
+    default:
+      throw new Error(`Invalid slug: ${slug}`);
+  }
+
   const asks = data.asks ?? [];
 
   if (asks.length === 0) {
@@ -21,7 +37,7 @@ export async function saveResult(slug, data, clobTokenIds) {
 
   await Promise.all(
     asks.map((buy_order) =>
-      OrderBookHistory.create({
+      History.create({
         slug,
         token_type,
         price: Number(buy_order.price),

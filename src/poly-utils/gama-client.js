@@ -3,8 +3,14 @@ const API_BASE_URL = "https://gamma-api.polymarket.com";
 
 export async function getMarketBySlug(slug) {
   try {
-    const response = await axios.get(`${API_BASE_URL}/markets/slug/${slug}`);
-    return response.data;
+    const btcResponse = await axios.get(`${API_BASE_URL}/markets/slug/${slug.btc}`);
+    const ethResponse = await axios.get(`${API_BASE_URL}/markets/slug/${slug.eth}`);
+    const solResponse = await axios.get(`${API_BASE_URL}/markets/slug/${slug.sol}`);
+    return {
+      btc: btcResponse.data,
+      eth: ethResponse.data,
+      sol: solResponse.data,
+    };
   } catch (error) {
     console.error(`Error fetching market by slug: ${error}`);
     throw error;

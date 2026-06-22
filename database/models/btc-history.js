@@ -1,6 +1,6 @@
-export const OrderBookHistory = (sequelize, DataTypes) => {
-  const OrderBookHistory = sequelize.define(
-    'OrderBookHistory',
+export const BtcHistory = (sequelize, DataTypes) => {
+  const BtcHistory = sequelize.define(
+    'BtcHistory',
     {
       slug: {
         type: DataTypes.STRING,
@@ -24,11 +24,11 @@ export const OrderBookHistory = (sequelize, DataTypes) => {
       },
     },
     {
-      tableName: 'order_book_history',
+      tableName: 'btc_history',
       underscored: true,
       timestamps: false,
     },
   );
 
-  return OrderBookHistory;
+  return BtcHistory;
 }

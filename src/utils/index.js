@@ -21,7 +21,7 @@ function toUnixSeconds(value) {
 }
 
 export function makeCryptoUpDownSlug({
-  asset = "btc",
+  asset = { btc: "btc", eth: "eth", sol: "sol" },
   timeframe = "5m",
   at = Date.now(),
 } = {}) {
@@ -34,5 +34,9 @@ export function makeCryptoUpDownSlug({
   const unixSeconds = toUnixSeconds(at);
   const windowStart = Math.floor(unixSeconds / windowSeconds) * windowSeconds;
 
-  return `${asset.toLowerCase()}-updown-${timeframe}-${windowStart}`;
+  return {
+    btc: `${asset.btc.toLowerCase()}-updown-${timeframe}-${windowStart}`,
+    eth: `${asset.eth.toLowerCase()}-updown-${timeframe}-${windowStart}`,
+    sol: `${asset.sol.toLowerCase()}-updown-${timeframe}-${windowStart}`
+  };
 }
