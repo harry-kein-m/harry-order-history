@@ -7,18 +7,26 @@ let ws = null;
 let pingInterval = null;
 let activeSlugKey = null;
 let subscriptionContext = null;
+let connectionId = 0;
 
 function slugKey(slug) {
   return `${slug.btc}|${slug.eth}|${slug.sol}`;
 }
 
 function closeConnection() {
+  connectionId += 1;
+
   if (pingInterval) {
     clearInterval(pingInterval);
     pingInterval = null;
   }
   if (ws) {
-    ws.close();
+    const closing = ws;
+    closing.onopen = null;
+    closing.onmessage = null;
+    closing.onerror = null;
+    closing.onclose = null;
+    closing.close();
     ws = null;
   }
   activeSlugKey = null;
@@ -65,7 +73,14 @@ const main = async () => {
   console.log(`|                                  ${slug.sol}|`);
   console.log(`-----------------------------------------------`);
 
-  const marketDetail = await getMarketBySlug(slug);
+  let marketDetail;
+  try {
+    marketDetail = await getMarketBySlug(slug);
+  } catch (error) {
+    console.error("Failed to fetch market details:", error.message);
+    return;
+  }
+
   const btcClobTokenIds = JSON.parse(marketDetail.btc.clobTokenIds);
   const ethClobTokenIds = JSON.parse(marketDetail.eth.clobTokenIds);
   const solClobTokenIds = JSON.parse(marketDetail.sol.clobTokenIds);
@@ -78,31 +93,46 @@ const main = async () => {
   };
   activeSlugKey = key;
 
-  ws = new WebSocket(
+  const connId = connectionId;
+  const socket = new WebSocket(
     "wss://ws-subscriptions-clob.polymarket.com/ws/market",
   );
+  ws = socket;
 
-  ws.onopen = () => {
-    ws.send(
-      JSON.stringify({
-        type: "market",
-        assets_ids: [
-          ...btcClobTokenIds,
-          ...ethClobTokenIds,
-          ...solClobTokenIds,
-        ],
-        custom_feature_enabled: true,
-      }),
-    );
+  socket.onopen = () => {
+    if (connId !== connectionId || socket.readyState !== WebSocket.OPEN) {
+      return;
+    }
+
+    try {
+      socket.send(
+        JSON.stringify({
+          type: "market",
+          assets_ids: [
+            ...btcClobTokenIds,
+            ...ethClobTokenIds,
+            ...solClobTokenIds,
+          ],
+          custom_feature_enabled: true,
+        }),
+      );
+    } catch (error) {
+      console.error("Failed to subscribe:", error.message);
+      return;
+    }
 
     pingInterval = setInterval(() => {
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.send("PING");
+      if (connId !== connectionId || socket.readyState !== WebSocket.OPEN) {
+        return;
       }
+      socket.send("PING");
     }, 10_000);
   };
 
-  ws.onmessage = async (event) => {
+  socket.onmessage = async (event) => {
+    if (connId !== connectionId) {
+      return;
+    }
     const raw = event.data;
     if (typeof raw !== "string") {
       return;
@@ -133,11 +163,17 @@ const main = async () => {
     }
   };
 
-  ws.onerror = (error) => {
+  socket.onerror = (error) => {
+    if (connId !== connectionId) {
+      return;
+    }
     console.error("WebSocket error:", error);
   };
 
-  ws.onclose = () => {
+  socket.onclose = () => {
+    if (connId !== connectionId) {
+      return;
+    }
     if (pingInterval) {
       clearInterval(pingInterval);
       pingInterval = null;
@@ -148,6 +184,12 @@ const main = async () => {
   };
 };
 
-const cronJob = cron.schedule("*/5 * * * * *", main);
+const cronJob = cron.schedule("*/5 * * * *", async () => {
+  try {
+    await main();
+  } catch (error) {
+    console.error("Error in main:", error);
+  }
+});
 cronJob.start();
 console.log("Cron job started");
